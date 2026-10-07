@@ -143,7 +143,7 @@
         .kuromi-mascot {
             text-align: center;
             font-size: 4em;
-            margin-bottom: -20px;
+            margin-bottom: -10px;
         }
 
         /* --- TABLO --- */
@@ -171,8 +171,69 @@
         
         .status-basarili { color: var(--success-text); font-weight: bold; }
         .status-bekliyor { color: #888; }
-        
         .rozet { font-size: 1.5em; }
+
+        /* --- ROZET MODALI (POP-UP) --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px 20px;
+            border: 4px solid var(--header-dark);
+            border-radius: 20px;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .modal-title {
+            color: var(--header-dark);
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .modal-message {
+            color: #555;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        .big-badge {
+            font-size: 80px;
+            margin: 20px 0;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        .btn-close-modal {
+            background-color: var(--header-dark);
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-close-modal:hover {
+            background-color: var(--header-light);
+        }
     </style>
 </head>
 <body>
@@ -180,243 +241,4 @@
     <!-- ÜST BİLGİLER -->
     <div class="dashboard-header">
         <div class="stat-card main-title" style="flex: 1.5;">
-            <div class="title">🖤 İPEK - GÜNLÜK ÇALIŞMA TAKİBİ ✨</div>
-            <div class="value" style="font-size: 1.2em;">4. Sınıf Çizelgesi</div>
-        </div>
-        <div class="stat-card">
-            <div class="title" style="background-color: #a45aab;">TOPLAM ÇÖZÜLEN</div>
-            <div class="value" id="toplam-cozulen-gosterge">0</div>
-        </div>
-        <div class="stat-card">
-            <div class="title" style="background-color: #d16db9;">GÜNLÜK ORTALAMA</div>
-            <div class="value" id="gunluk-ortalama-gosterge">0</div>
-        </div>
-        <div class="stat-card">
-            <div class="title" style="background-color: #5a2e70;">TOPLAM HEDEF</div>
-            <div class="value">5.040</div>
-        </div>
-    </div>
-
-    <!-- SEKMELER -->
-    <div class="tabs">
-        <button class="tab-btn active" onclick="openTab('tab-giris')">✍️ Bugünün Görevleri (İpek)</button>
-        <button class="tab-btn" onclick="openTab('tab-tablo')">📊 Tüm Çizelge</button>
-    </div>
-
-    <!-- TAB 1: VERİ GİRİŞİ (İPEK İÇİN) -->
-    <div id="tab-giris" class="tab-content active">
-        <div class="kuromi-mascot">😈🖤</div>
-        <h2 style="text-align: center; color: var(--header-dark);">Selam İpek! Bugün Neler Yaptık?</h2>
-        
-        <div class="form-group">
-            <label>Hangi Gün İçin Giriyorsun?</label>
-            <input type="date" id="input-tarih">
-        </div>
-
-        <div class="ders-grid">
-            <div class="form-group"><label>Paragraf</label><input type="number" id="inp-paragraf" min="0" placeholder="0"></div>
-            <div class="form-group"><label>Matematik</label><input type="number" id="inp-matematik" min="0" placeholder="0"></div>
-            <div class="form-group"><label>Fen Bilimleri</label><input type="number" id="inp-fen" min="0" placeholder="0"></div>
-            <div class="form-group"><label>Sosyal Bilgiler</label><input type="number" id="inp-sosyal" min="0" placeholder="0"></div>
-            <div class="form-group"><label>Türkçe</label><input type="number" id="inp-turkce" min="0" placeholder="0"></div>
-        </div>
-
-        <div class="form-group">
-            <label>Ödev Durumu</label>
-            <select id="inp-odev">
-                <option value="Bekliyor">Seçim Yap...</option>
-                <option value="Yapıldı">Yapıldı ✅</option>
-                <option value="Ödevsiz Gün">Ödevsiz Gün 🎈</option>
-            </select>
-        </div>
-
-        <button class="btn-save" onclick="veriyiKaydet()">GÜNÜ KAYDET VE KUROMİ ROZETİNİ AL! ✨</button>
-    </div>
-
-    <!-- TAB 2: TABLO (EXCEL GÖRÜNÜMÜ) -->
-    <div id="tab-tablo" class="tab-content">
-        <div class="table-container">
-            <table id="main-table">
-                <thead>
-                    <tr>
-                        <th>Tarih</th>
-                        <th>Gün</th>
-                        <th>Paragraf</th>
-                        <th>Matematik</th>
-                        <th>Fen Bilimleri</th>
-                        <th>Sosyal Bilgiler</th>
-                        <th>Türkçe</th>
-                        <th style="background-color: #4a1f5c;">Toplam</th>
-                        <th>Hedef</th>
-                        <th>Ödev</th>
-                        <th>Durum</th>
-                        <th>Kuromi Rozeti</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                    <!-- JavaScript ile doldurulacak -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <script>
-        // Veritabanı (Tarayıcı hafızası)
-        let cizelgeVerisi = JSON.parse(localStorage.getItem('ipekKuromiData')) || {};
-        const BASLANGIC_TARIHI = new Date('2026-10-05');
-        const GUN_SAYISI = 60; // 2 aylık tablo oluşturur
-
-        // Sekme Değiştirme Sistemi
-        function openTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
-            
-            if(tabId === 'tab-tablo') tabloyuOlustur();
-        }
-
-        // Tarih Formatlayıcı (GG.AA.YYYY)
-        function formatDate(date) {
-            let d = date.getDate().toString().padStart(2, '0');
-            let m = (date.getMonth() + 1).toString().padStart(2, '0');
-            let y = date.getFullYear();
-            return `${d}.${m}.${y}`;
-        }
-        
-        // Input için Tarih Formatlayıcı (YYYY-AA-GG)
-        function formatInputDate(date) {
-            return date.toISOString().split('T')[0];
-        }
-
-        // Gün İsmi Getirme
-        function getGunIsmi(date) {
-            const gunler = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
-            return gunler[date.getDay()];
-        }
-
-        // Bugünün tarihini formda varsayılan yap
-        document.getElementById('input-tarih').value = formatInputDate(new Date());
-
-        // Veri Kaydetme İşlemi (İpek butona basınca)
-        function veriyiKaydet() {
-            const secilenTarih = document.getElementById('input-tarih').value; // YYYY-MM-DD
-            if(!secilenTarih) return alert("Lütfen bir tarih seç!");
-
-            // GG.AA.YYYY formatına çevir, tabloda bu format anahtar (key) olarak kullanılacak
-            const [y, m, d] = secilenTarih.split('-');
-            const formatliTarih = `${d}.${m}.${y}`;
-
-            const paragraf = parseInt(document.getElementById('inp-paragraf').value) || 0;
-            const matematik = parseInt(document.getElementById('inp-matematik').value) || 0;
-            const fen = parseInt(document.getElementById('inp-fen').value) || 0;
-            const sosyal = parseInt(document.getElementById('inp-sosyal').value) || 0;
-            const turkce = parseInt(document.getElementById('inp-turkce').value) || 0;
-            const odev = document.getElementById('inp-odev').value;
-
-            // Veriyi objeye kaydet
-            cizelgeVerisi[formatliTarih] = {
-                paragraf, matematik, fen, sosyal, turkce,
-                odev: odev === 'Bekliyor' ? '' : odev
-            };
-
-            // Tarayıcıya kaydet
-            localStorage.setItem('ipekKuromiData', JSON.stringify(cizelgeVerisi));
-            
-            alert("Harika! Veriler kaydedildi. Rozetini görmek için Tüm Çizelge sekmesine bakabilirsin! 💜");
-            tabloyuOlustur();
-        }
-
-        // Tabloyu ve Üst İstatistikleri Çizdirme
-        function tabloyuOlustur() {
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = '';
-            
-            let genelToplamSoru = 0;
-            let calisilanGunSayisi = 0;
-
-            let islenenTarih = new Date(BASLANGIC_TARIHI);
-
-            for (let i = 0; i < GUN_SAYISI; i++) {
-                const tarihStr = formatDate(islenenTarih);
-                const gunIsmi = getGunIsmi(islenenTarih);
-                const isPazar = islenenTarih.getDay() === 0;
-                const hedefSoru = isPazar ? 0 : 40;
-                
-                // O günün verisini getir veya boş değerler ata
-                const gunVerisi = cizelgeVerisi[tarihStr] || { paragraf: '', matematik: '', fen: '', sosyal: '', turkce: '', odev: '' };
-                
-                // Toplamı hesapla
-                let gunlukToplam = 0;
-                if(gunVerisi.paragraf) gunlukToplam += gunVerisi.paragraf;
-                if(gunVerisi.matematik) gunlukToplam += gunVerisi.matematik;
-                if(gunVerisi.fen) gunlukToplam += gunVerisi.fen;
-                if(gunVerisi.sosyal) gunlukToplam += gunVerisi.sosyal;
-                if(gunVerisi.turkce) gunlukToplam += gunVerisi.turkce;
-
-                // Durum ve Rozet Hesaplama
-                let durum = "Bekliyor";
-                let rozet = "⏳ Bekliyor";
-                let odevDurumu = gunVerisi.odev || (isPazar ? "" : "-");
-                let bgColorClass = "";
-                let durumClass = "status-bekliyor";
-
-                if (isPazar) {
-                    durum = "Tatil";
-                    rozet = "👾 Dinlenme Günü";
-                    bgColorClass = "row-tatil";
-                    durumClass = "";
-                } else if (gunlukToplam > 0 || gunVerisi.odev) {
-                    if (gunlukToplam >= hedefSoru) {
-                        durum = "Hedefe Ulaşıldı";
-                        rozet = "💖";
-                        durumClass = "status-basarili";
-                        bgColorClass = "row-success"; // İstersen buraya yeşil bir CSS class'ı ekleyebilirsin
-                    } else {
-                        durum = "Eksik / Devam Ediyor";
-                        rozet = "🖤 Çalışıyor";
-                    }
-                }
-
-                // İstatistik hesaplaması için
-                if(gunlukToplam > 0) {
-                    genelToplamSoru += gunlukToplam;
-                    calisilanGunSayisi++;
-                }
-
-                // Satırı HTML'e Ekleme
-                const tr = document.createElement('tr');
-                if(bgColorClass) tr.classList.add(bgColorClass);
-                
-                tr.innerHTML = `
-                    <td>${tarihStr}</td>
-                    <td>${gunIsmi}</td>
-                    <td style="color: #28a745; font-weight: bold;">${gunVerisi.paragraf || ''}</td>
-                    <td style="color: #28a745; font-weight: bold;">${gunVerisi.matematik || ''}</td>
-                    <td>${gunVerisi.fen || ''}</td>
-                    <td>${gunVerisi.sosyal || ''}</td>
-                    <td>${gunVerisi.turkce || ''}</td>
-                    <td style="font-weight: bold;">${gunlukToplam > 0 ? gunlukToplam : ''}</td>
-                    <td>${hedefSoru}</td>
-                    <td>${odevDurumu}</td>
-                    <td class="${durumClass}">${durum}</td>
-                    <td class="rozet">${rozet}</td>
-                `;
-                tbody.appendChild(tr);
-
-                // Sonraki güne geç
-                islenenTarih.setDate(islenenTarih.getDate() + 1);
-            }
-
-            // Üst Göstergeleri Güncelle
-            document.getElementById('toplam-cozulen-gosterge').innerText = genelToplamSoru;
-            const ortalama = calisilanGunSayisi > 0 ? Math.round(genelToplamSoru / calisilanGunSayisi) : 0;
-            document.getElementById('gunluk-ortalama-gosterge').innerText = ortalama;
-        }
-
-        // Sayfa yüklendiğinde tabloyu arka planda oluştur
-        window.onload = tabloyuOlustur;
-
-    </script>
-</body>
-</html>
+            <div class="title">💜 İPEK - GÜ
