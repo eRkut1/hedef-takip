@@ -1,3 +1,9 @@
+Çok haklısın, Pazar denemesini ve diğer eklentileri hızlıca birleştirelim derken o tatlı, detaylı pop-up (tebrik) mesajlarını biraz fazla sadeleştirmişim. Ödevi unuttuğunda "Harikasın" demesi hiç doğru değil, hemen bu mantığı ilk baştaki akıllı haline geri getirdim!
+PK XD karakteri animasyonunu tamamen sildim, kodumuz tertemiz oldu. Artık pop-up mesajları hem soru sayısını hem de ödev durumunu ayrı ayrı kontrol ederek en doğru cevabı verecek:
+ * Hedef bitti ama ödev seçilmediyse: "Soru hedefin tamam ama okul ödevin varsa onu işaretlemeyi unutma!"
+ * Sorular yarım ama ödev bittiyse: "Ödevler bitmiş, süpersin! Şimdi kalan soruları tamamlamalısın."
+Ve "Kusursuz Hafta" (Altın Rozet) eklentisi de devrede! Pazartesi'den Cumartesi'ye hedefleri tamamlarsa tablo Pazar günleri altın rengine bürünecek.
+İşte en stabil, detaylı mesajlara sahip ve altın rozetli nihai kod:
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -9,7 +15,7 @@
         :root { --bg-color: #fcf4ff; --header-dark: #5a2e70; --header-light: #b388c9; --accent-color: #ff66a3; --text-dark: #333; --success-text: #155724; --stat-bg-1: #a45aab; --stat-bg-2: #d16db9; }
         body.theme-ladybug { --bg-color: #fff0f0; --header-dark: #b30000; --header-light: #ff4d4d; --accent-color: #29a329; --stat-bg-1: #cc0000; --stat-bg-2: #e60000; }
         body.theme-f4 { --bg-color: #f0f5ff; --header-dark: #003399; --header-light: #4da6ff; --accent-color: #ff8c00; --stat-bg-1: #004080; --stat-bg-2: #0066cc; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 20px; max-width: 1200px; margin: 0 auto; transition: 0.5s; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 20px; max-width: 1200px; margin: 0 auto; transition: 0.5s; overflow-x: hidden; }
         
         .top-controls { display: flex; justify-content: flex-end; margin-bottom: 10px; }
         .theme-selector { background: white; padding: 8px 15px; border-radius: 20px; border: 2px solid var(--header-dark); font-weight: bold; color: var(--header-dark); }
@@ -35,7 +41,6 @@
         .form-group input, .form-group select { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         .ders-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 20px; }
         
-        /* DENEME SINAVI CSS */
         .deneme-container { display: none; background: #fffdf5; border: 2px solid #e6c855; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
         .deneme-title { text-align: center; color: #b38d00; margin-top: 0; margin-bottom: 15px; font-size: 1.3em; }
         .deneme-row { display: grid; grid-template-columns: 120px 1fr 1fr 1fr; gap: 10px; align-items: center; margin-bottom: 10px; background: white; padding: 10px; border-radius: 8px; border: 1px solid #eee; }
@@ -51,6 +56,12 @@
         tr:nth-child(even) { background-color: #f9f9f9; }
         .row-tatil { background: rgba(0,0,0,0.03); color: #555; }
         .deneme-text { font-size: 0.85em; font-weight: bold; color: #d35400; }
+        
+        /* PREMIUM (KUSURSUZ) HAFTA CSS */
+        .row-golden { background-color: #fffaf0 !important; }
+        .row-golden td { border-color: #fadd8c; }
+        .row-golden .rozet { text-shadow: 0 0 10px #ffd700; font-size: 2em; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
         
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); }
         .modal-content { background: white; margin: 10% auto; padding: 30px 20px; border: 4px solid var(--header-dark); border-radius: 20px; width: 80%; max-width: 400px; text-align: center; }
@@ -117,31 +128,10 @@
         <!-- PAZAR GÜNÜ DENEME FORMU -->
         <div id="deneme-form-alani" class="deneme-container">
             <h3 class="deneme-title">📝 PAZAR GÜNÜ DENEME SINAVI</h3>
-            
-            <div class="deneme-row">
-                <label>Türkçe:</label>
-                <input type="number" id="den-turkce-s" placeholder="Soru">
-                <input type="number" id="den-turkce-d" placeholder="Doğru">
-                <input type="number" id="den-turkce-y" placeholder="Yanlış">
-            </div>
-            <div class="deneme-row">
-                <label>Matematik:</label>
-                <input type="number" id="den-mat-s" placeholder="Soru">
-                <input type="number" id="den-mat-d" placeholder="Doğru">
-                <input type="number" id="den-mat-y" placeholder="Yanlış">
-            </div>
-            <div class="deneme-row">
-                <label>Fen Bilimleri:</label>
-                <input type="number" id="den-fen-s" placeholder="Soru">
-                <input type="number" id="den-fen-d" placeholder="Doğru">
-                <input type="number" id="den-fen-y" placeholder="Yanlış">
-            </div>
-            <div class="deneme-row">
-                <label>Sosyal Bilgiler:</label>
-                <input type="number" id="den-sosyal-s" placeholder="Soru">
-                <input type="number" id="den-sosyal-d" placeholder="Doğru">
-                <input type="number" id="den-sosyal-y" placeholder="Yanlış">
-            </div>
+            <div class="deneme-row"><label>Türkçe:</label><input type="number" id="den-turkce-s" placeholder="Soru"><input type="number" id="den-turkce-d" placeholder="Doğru"><input type="number" id="den-turkce-y" placeholder="Yanlış"></div>
+            <div class="deneme-row"><label>Matematik:</label><input type="number" id="den-mat-s" placeholder="Soru"><input type="number" id="den-mat-d" placeholder="Doğru"><input type="number" id="den-mat-y" placeholder="Yanlış"></div>
+            <div class="deneme-row"><label>Fen Bilimleri:</label><input type="number" id="den-fen-s" placeholder="Soru"><input type="number" id="den-fen-d" placeholder="Doğru"><input type="number" id="den-fen-y" placeholder="Yanlış"></div>
+            <div class="deneme-row"><label>Sosyal Bilgiler:</label><input type="number" id="den-sosyal-s" placeholder="Soru"><input type="number" id="den-sosyal-d" placeholder="Doğru"><input type="number" id="den-sosyal-y" placeholder="Yanlış"></div>
         </div>
 
         <button class="btn-save" onclick="veriyiKaydet()">GÜNÜ KAYDET VE ROZETİNİ AL!</button>
@@ -171,7 +161,7 @@
         <div class="modal-content">
             <h2 id="modal-title" style="color:var(--header-dark); margin-top:0;">Harika İş!</h2>
             <div class="big-badge" id="modal-badge">💖</div>
-            <p id="modal-message" style="font-size:1.1em; color:#555;">Hedefe ulaştın!</p>
+            <p id="modal-message" style="font-size:1.1em; color:#555; line-height: 1.4;">Hedefe ulaştın!</p>
             <button class="btn-close-modal" onclick="document.getElementById('rozet-modal').style.display='none'">Tamam, Teşekkürler!</button>
         </div>
     </div>
@@ -193,9 +183,9 @@
         let cizelgeVerisi = {};
 
         const TEMA_VERILERI = {
-            kuromi: { baslik_ikon: "💜", baslik_ikon2: "✨", mascot: "🐰💜✨", rozetler: { success: "💖", no_hw: "🎈", working: "🖤", rest: "👾", deneme: "🏆", waiting: "⏳" } },
-            ladybug: { baslik_ikon: "🐞", baslik_ikon2: "🐾", mascot: "🐞🐾✨", rozetler: { success: "🦸‍♀️", no_hw: "🥐", working: "🐾", rest: "🗼", deneme: "🎖️", waiting: "⏳" } },
-            f4: { baslik_ikon: "🦸‍♂️", baslik_ikon2: "🚀", mascot: "🦸‍♂️☄️🔥", rozetler: { success: "🚀", no_hw: "🌌", working: "⚛️", rest: "🏙️", deneme: "🌟", waiting: "⏳" } }
+            kuromi: { baslik_ikon: "💜", baslik_ikon2: "✨", mascot: "🐰💜✨", rozetler: { success: "💖", no_hw: "🎈", working: "🖤", rest: "👾", deneme: "🏆", waiting: "⏳", golden: "🌟" } },
+            ladybug: { baslik_ikon: "🐞", baslik_ikon2: "🐾", mascot: "🐞🐾✨", rozetler: { success: "🦸‍♀️", no_hw: "🥐", working: "🐾", rest: "🗼", deneme: "🎖️", waiting: "⏳", golden: "👑" } },
+            f4: { baslik_ikon: "🦸‍♂️", baslik_ikon2: "🚀", mascot: "🦸‍♂️☄️🔥", rozetler: { success: "🚀", no_hw: "🌌", working: "⚛️", rest: "🏙️", deneme: "🌟", waiting: "⏳", golden: "🏆" } }
         };
 
         let aktifTema = localStorage.getItem('ipekTheme') || 'kuromi';
@@ -232,7 +222,6 @@
             };
             document.getElementById('tavsiye-metni').innerText = tavsiyeler[gunIndex];
 
-            // Pazar günü (0) ise deneme formunu aç, normali gizle
             if(gunIndex === 0) {
                 document.getElementById('normal-form-alani').style.display = 'none';
                 document.getElementById('deneme-form-alani').style.display = 'block';
@@ -258,7 +247,6 @@
             let kaydedilecekVeri = {}, rozet = "", baslik = "", mesaj = "";
 
             if (isPazar) {
-                // Deneme Sınavı Verilerini Çek
                 const val = (id) => parseInt(document.getElementById(id).value) || 0;
                 kaydedilecekVeri = {
                     isDeneme: true,
@@ -277,7 +265,6 @@
                     rozet = R.rest; baslik = "Tatil Günü!"; mesaj = "Bugün deneme çözülmediği için serbest zaman, iyice dinlen! 🎈";
                 }
             } else {
-                // Normal Gün Verilerini Çek
                 const p = parseInt(document.getElementById('inp-paragraf').value) || 0;
                 const m = parseInt(document.getElementById('inp-matematik').value) || 0;
                 const f = parseInt(document.getElementById('inp-fen').value) || 0;
@@ -288,9 +275,22 @@
 
                 kaydedilecekVeri = { paragraf: p, matematik: m, fen: f, sosyal: s, turkce: t, odev: odev === 'Bekliyor' ? '' : odev };
                 
-                if (toplam >= 40) { rozet = R.success; baslik = "Harikasın!"; mesaj = `Hedefe ulaştın! ${toplam} soru çözüldü.`; } 
-                else if (toplam > 0) { rozet = R.working; baslik = "Devam Et!"; mesaj = `Güzel adım, ${toplam} soru çözdün, biraz daha gayret!`; } 
-                else if (odev !== 'Bekliyor') { rozet = R.no_hw; baslik = "Sıra Sorularda!"; mesaj = "Ödev durumunu girdin, sıra soru hedefini tamamlamakta!"; }
+                // DETAYLI MESAJ (POP-UP) MANTIĞI
+                if (toplam >= 40) {
+                    if (odev === 'Yapıldı') { rozet = R.success; baslik = "Mükemmel Bir Gün!"; mesaj = `Harikasın İpek! Hem ${toplam} soru çözerek hedefini geçtin hem de okul ödevlerini bitirdin.`; }
+                    else if (odev === 'Ödevsiz Gün') { rozet = R.success; baslik = "Görev Tamamlandı!"; mesaj = `Tebrikler! ${toplam} soru çözdün ve hedefine ulaştın. Üstelik ödev de yokmuş!`; }
+                    else { rozet = R.working; baslik = "Soru Hedefi Tamam!"; mesaj = `Süper, soru hedefini tamamladın. Fakat okul ödevini "Yapıldı" olarak işaretlememişsin. Ödevin varsa onu da unutma!`; }
+                } 
+                else if (toplam > 0) {
+                    if (odev === 'Yapıldı') { rozet = R.working; baslik = "Çok İyi Gidiyorsun!"; mesaj = `Okul ödevlerini bitirmişsin, süpersin! Şu an ${toplam} soru çözdün. Hedefe (40) ulaşmak için biraz daha gayret etmelisin.`; }
+                    else if (odev === 'Ödevsiz Gün') { rozet = R.working; baslik = "Güzel Başlangıç!"; mesaj = `Bugün ödev yokmuş, ne güzel! Şu an ${toplam} soru çözdün. Hadi kalanları bitirip hedefini tamamla.`; }
+                    else { rozet = R.working; baslik = "Çalışmaya Devam!"; mesaj = `Şu an ${toplam} soru çözdün. Hem ödevlerini hem de kalan soruları tamamlamak için çalışmaya devam!`; }
+                } 
+                else {
+                    if (odev === 'Yapıldı') { rozet = R.working; baslik = "Ödevler Bitti!"; mesaj = `Okul ödevlerini halletmişsin, harika sorumluluk! Şimdi sıra bugünün soru hedefini (40) tamamlamakta.`; }
+                    else if (odev === 'Ödevsiz Gün') { rozet = R.no_hw; baslik = "Zaman Senin!"; mesaj = `Bugün okul ödevin yok! Bol vaktin varken soru hedefini (40) hızlıca bitirmek için güzel bir fırsat.`; }
+                    else { rozet = R.waiting; baslik = "Hadi Başlayalım!"; mesaj = `Henüz bugünün görevlerine başlamamışsın gibi görünüyor. Masana geçip harika işler başaracağına eminim!`; }
+                }
             }
 
             db.ref('ipekData/' + secilenTarih).set(kaydedilecekVeri);
@@ -309,16 +309,40 @@
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = '';
             let genelToplamSoru = 0, calisilanGunSayisi = 0;
-            let islenenTarih = new Date(BASLANGIC_TARIHI);
             const R = TEMA_VERILERI[aktifTema].rozetler;
+            const gunSayisi = 60;
+            
+            // Verileri diziye çek ve haftaları kontrol et (Kusursuz Hafta Algoritması)
+            let veriDizisi = [];
+            let islenenListeTarihi = new Date(BASLANGIC_TARIHI);
+            for (let i = 0; i < gunSayisi; i++) {
+                veriDizisi.push(cizelgeVerisi[islenenListeTarihi.toISOString().split('T')[0]] || {});
+                islenenListeTarihi.setDate(islenenListeTarihi.getDate() + 1);
+            }
 
-            for (let i = 0; i < 60; i++) {
+            let mukemmelHaftalar = [];
+            for (let w = 0; w < Math.ceil(gunSayisi / 7); w++) {
+                let hepsiTamam = true;
+                for (let d = 0; d < 6; d++) { // Pzt - Cmt
+                    let dayIndex = w * 7 + d;
+                    if (dayIndex >= gunSayisi) break;
+                    let v = veriDizisi[dayIndex];
+                    let top = (v.paragraf||0) + (v.matematik||0) + (v.fen||0) + (v.sosyal||0) + (v.turkce||0);
+                    if (top < 40) { hepsiTamam = false; break; }
+                }
+                mukemmelHaftalar[w] = hepsiTamam;
+            }
+
+            // Tabloyu Ekrana Çiz
+            let islenenTarih = new Date(BASLANGIC_TARIHI);
+            for (let i = 0; i < gunSayisi; i++) {
                 const dbStr = islenenTarih.toISOString().split('T')[0];
                 const dStr = islenenTarih.getDate().toString().padStart(2, '0') + "." + (islenenTarih.getMonth() + 1).toString().padStart(2, '0');
                 const isPazar = islenenTarih.getDay() === 0;
                 const gunler = ['Pazar', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
                 
-                const veri = cizelgeVerisi[dbStr] || {};
+                const veri = veriDizisi[i];
+                let isGolden = mukemmelHaftalar[Math.floor(i / 7)] && !isPazar; // Hafta mükemmelse Pazar hariç altın yap
                 let tr = document.createElement('tr');
                 
                 if (isPazar) {
@@ -341,9 +365,15 @@
                         tr.innerHTML = `<td>${dStr}</td><td>Pazar</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>Tatil</td><td class="rozet">${R.rest}</td>`;
                     }
                 } else {
+                    if (isGolden) tr.classList.add('row-golden');
                     const top = (veri.paragraf||0) + (veri.matematik||0) + (veri.fen||0) + (veri.sosyal||0) + (veri.turkce||0);
                     if(top > 0) { genelToplamSoru += top; calisilanGunSayisi++; }
-                    const r = top >= 40 ? R.success : (top > 0 || veri.odev ? R.working : R.waiting);
+                    
+                    let r = R.waiting;
+                    if(isGolden) r = R.golden; // Altın Hafta!
+                    else if (top >= 40) r = R.success;
+                    else if (top > 0 || veri.odev) r = R.working;
+
                     tr.innerHTML = `
                         <td>${dStr}</td><td>${gunler[islenenTarih.getDay()]}</td>
                         <td style="color:#28a745; font-weight:bold;">${veri.paragraf || ''}</td>
@@ -351,7 +381,7 @@
                         <td>${veri.fen || ''}</td><td>${veri.sosyal || ''}</td><td>${veri.turkce || ''}</td>
                         <td style="font-weight:bold;">${top > 0 ? top : ''}</td>
                         <td>40</td><td>${veri.odev || '-'}</td>
-                        <td>${top >= 40 ? 'Tamamlandı' : 'Bekliyor'}</td>
+                        <td style="${isGolden ? 'color:#b38d00; font-weight:bold;' : ''}">${isGolden ? 'Kusursuz Gün!' : (top >= 40 ? 'Tamamlandı' : 'Bekliyor')}</td>
                         <td class="rozet">${r}</td>`;
                 }
                 tbody.appendChild(tr);
@@ -363,3 +393,4 @@
     </script>
 </body>
 </html>
+
