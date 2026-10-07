@@ -321,7 +321,6 @@
     </div>
 
     <script>
-        // Olası bozuk kayıt (JSON) çökmelerini engellemek için try-catch eklendi
         let cizelgeVerisi = {};
         try {
             cizelgeVerisi = JSON.parse(localStorage.getItem('ipekKuromiData')) || {};
@@ -342,7 +341,6 @@
             0: "🎉 HAFTALIK DİNLENME VE SERBEST ZAMAN GÜNÜ <br>(Çalışma Yok / Tatil)"
         };
 
-        // Kapsam (Scope) hatası vermemesi için fonksiyonlar window objesine bağlandı
         window.openTab = function(event, tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -417,108 +415,48 @@
             if (isPazar) {
                 rozet = "👾"; 
                 baslik = "Bugün Tatil!"; 
-                mesaj = "Pazar günü dinlenme günü. İyi eğlenceler!";
-            } else if (gunlukToplam >= hedefSoru) {
-                rozet = "💖"; 
-                baslik = "Mükemmel İş!"; 
-                mesaj = `Harikasın! Toplam ${gunlukToplam} soru çözerek günlük hedefini geçtin.`;
-            } else if (odev === 'Ödevsiz Gün') {
-                rozet = "🎈"; 
-                baslik = "Ödevsiz Gün!"; 
-                mesaj = "Bugün ödev yokmuş, biraz dinlenebilirsin!";
-            } else if (gunlukToplam > 0 || odev === 'Yapıldı') {
-                rozet = "🖤"; 
-                baslik = "Çalışmaya Devam!"; 
-                mesaj = `Şu ana kadar hedefin için emek verdin. Daha iyisini de yapabilirsin!`;
+                mesaj = "Harika bir hafta geçirdin. Pazar günü dinlenme günümüz, bol bol eğlen ve enerjini topla İpek! 🎈";
             } else {
-                rozet = "⏳";
-                baslik = "Güncellendi!";
-                mesaj = "Verilerin başarıyla tabloya eklendi.";
-            }
-
-            if (odev === 'Yapıldı' && !isPazar) {
-                mesaj += "<br><br>🌟 <strong>Ayrıca ödevlerini de tamamlamışsın, harikasın!</strong>";
+                // Soru Hedefi 40 ve üzerine ulaşıldıysa
+                if (gunlukToplam >= hedefSoru) {
+                    if (odev === 'Yapıldı') {
+                        rozet = "💖"; baslik = "Mükemmel Bir Gün!"; 
+                        mesaj = `Harikasın İpek! Hem ${gunlukToplam} soru çözerek hedefini geçtin hem de okul ödevlerini bitirdin. Seninle gurur duyuyorum! 🌟`;
+                    } else if (odev === 'Ödevsiz Gün') {
+                        rozet = "💖"; baslik = "Görev Tamamlandı!"; 
+                        mesaj = `Tebrikler! ${gunlukToplam} soru çözdün ve hedefine ulaştın. Üstelik bugün ödev de yokmuş, şimdi güzelce dinlenme ve oyun vakti! 🎮`;
+                    } else {
+                        rozet = "💖"; baslik = "Soru Hedefi Tamam!"; 
+                        mesaj = `Süper, ${gunlukToplam} soru çözerek bugünkü hedefine ulaştın! Okul ödevin varsa onu da tamamlamayı unutma tatlım. 🎯`;
+                    }
+                } 
+                // Hedefe ulaşılmadı ama soru çözüldüyse
+                else if (gunlukToplam > 0) {
+                    if (odev === 'Yapıldı') {
+                        rozet = "🖤"; baslik = "Çok İyi Gidiyorsun!"; 
+                        mesaj = `Okul ödevlerini bitirmişsin, süpersin! 👏 Şu an ${gunlukToplam} soru çözdün. Soru hedefine (40) ulaşmak için birazcık daha gayret etmelisin, başarabileceğini biliyorum! 💪`;
+                    } else if (odev === 'Ödevsiz Gün') {
+                        rozet = "🖤"; baslik = "Güzel Bir Başlangıç!"; 
+                        mesaj = `Bugün okul ödevi yokmuş, ne güzel! 🎈 Şu an ${gunlukToplam} soru çözdün. Hazır vaktin varken günlük hedefini (40) tamamlamaya ne dersin? Başarabilirsin!`;
+                    } else {
+                        rozet = "🖤"; baslik = "Çalışmaya Devam!"; 
+                        mesaj = `Güzel bir adım attın ve ${gunlukToplam} soru çözdün. 🌟 Hem ödevlerini hem de kalan sorularını tamamlamak için masaya dönme vakti!`;
+                    }
+                } 
+                // Hiç soru çözülmediyse
+                else {
+                    if (odev === 'Yapıldı') {
+                        rozet = "🖤"; baslik = "Ödevler Bitti!"; 
+                        mesaj = `Okul ödevlerini halletmişsin, harika bir sorumluluk örneği! 🌟 Şimdi sıra bugünün soru hedefini (40) tamamlamakta. Hadi başlayalım! 🚀`;
+                    } else if (odev === 'Ödevsiz Gün') {
+                        rozet = "🎈"; baslik = "Zaman Senin!"; 
+                        mesaj = `Bugün okul ödevin yokmuş! 😊 Bu bol vakti soru hedefini (40) hızlıca bitirmek için değerlendirebilirsin. Masan seni bekliyor İpek! 📚`;
+                    } else {
+                        rozet = "⏳"; baslik = "Hadi Başlayalım!"; 
+                        mesaj = `Henüz bugünün görevlerine başlamamışsın gibi görünüyor. Masana geçip harika işler başaracağına eminim! ✨`;
+                    }
+                }
             }
 
             document.getElementById('modal-badge').innerText = rozet;
-            document.getElementById('modal-title').innerText = baslik;
-            document.getElementById('modal-message').innerHTML = mesaj; 
-            document.getElementById('rozet-modal').style.display = 'block';
-        };
-
-        window.kapatModal = function() {
-            document.getElementById('rozet-modal').style.display = 'none';
-        };
-
-        function tabloyuOlustur() {
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = '';
-            
-            let genelToplamSoru = 0;
-            let calisilanGunSayisi = 0;
-            let islenenTarih = new Date(BASLANGIC_TARIHI);
-
-            for (let i = 0; i < GUN_SAYISI; i++) {
-                const tarihStr = formatDate(islenenTarih);
-                const gunIsmi = getGunIsmi(islenenTarih);
-                const isPazar = islenenTarih.getDay() === 0;
-                const hedefSoru = isPazar ? 0 : 40;
-                
-                const gunVerisi = cizelgeVerisi[tarihStr] || { paragraf: '', matematik: '', fen: '', sosyal: '', turkce: '', odev: '' };
-                
-                let gunlukToplam = 0;
-                if(gunVerisi.paragraf) gunlukToplam += gunVerisi.paragraf;
-                if(gunVerisi.matematik) gunlukToplam += gunVerisi.matematik;
-                if(gunVerisi.fen) gunlukToplam += gunVerisi.fen;
-                if(gunVerisi.sosyal) gunlukToplam += gunVerisi.sosyal;
-                if(gunVerisi.turkce) gunlukToplam += gunVerisi.turkce;
-
-                let durum = "Bekliyor";
-                let rozet = "⏳ Bekliyor";
-                let odevDurumu = gunVerisi.odev || (isPazar ? "" : "-");
-                let bgColorClass = "";
-                let durumClass = "status-bekliyor";
-
-                if (isPazar) {
-                    durum = "Tatil"; rozet = "👾 Dinlenme"; bgColorClass = "row-tatil"; durumClass = "";
-                } else if (gunlukToplam > 0 || gunVerisi.odev) {
-                    if (gunlukToplam >= hedefSoru) {
-                        durum = "Hedefe Ulaşıldı"; rozet = "💖"; durumClass = "status-basarili";
-                    } else {
-                        durum = "Devam Ediyor"; rozet = "🖤 Çalışıyor";
-                    }
-                }
-
-                if(gunlukToplam > 0) {
-                    genelToplamSoru += gunlukToplam;
-                    calisilanGunSayisi++;
-                }
-
-                const tr = document.createElement('tr');
-                if(bgColorClass) tr.classList.add(bgColorClass);
-                
-                tr.innerHTML = `
-                    <td>${tarihStr}</td>
-                    <td>${gunIsmi}</td>
-                    <td style="color: #28a745; font-weight: bold;">${gunVerisi.paragraf || ''}</td>
-                    <td style="color: #28a745; font-weight: bold;">${gunVerisi.matematik || ''}</td>
-                    <td>${gunVerisi.fen || ''}</td>
-                    <td>${gunVerisi.sosyal || ''}</td>
-                    <td>${gunVerisi.turkce || ''}</td>
-                    <td style="font-weight: bold;">${gunlukToplam > 0 ? gunlukToplam : ''}</td>
-                    <td>${hedefSoru}</td>
-                    <td>${odevDurumu}</td>
-                    <td class="${durumClass}">${durum}</td>
-                    <td class="rozet">${rozet}</td>
-                `;
-                tbody.appendChild(tr);
-                islenenTarih.setDate(islenenTarih.getDate() + 1);
-            }
-
-            document.getElementById('toplam-cozulen-gosterge').innerText = genelToplamSoru;
-            const ortalama = calisilanGunSayisi > 0 ? Math.round(genelToplamSoru / calisilanGunSayisi) : 0;
-            document.getElementById('gunluk-ortalama-gosterge').innerText = ortalama;
-        }
-    </script>
-</body>
-</html>
+            document.
