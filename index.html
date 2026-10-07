@@ -39,7 +39,7 @@
         .main-header h1 { margin: 0; font-size: 1.5em; }
         .main-header p { margin: 5px 0 0 0; font-size: 1em; color: #e0d4e8; }
 
-        /* --- ÜST BİLGİ KARTLARI (ARTIK SADECE TABLO SEKMESİNDE) --- */
+        /* --- ÜST BİLGİ KARTLARI --- */
         .dashboard-header {
             display: flex;
             gap: 20px;
@@ -266,10 +266,10 @@
         <button class="btn-save" onclick="veriyiKaydet()">GÜNÜ KAYDET VE ROZETİNİ AL! ✨</button>
     </div>
 
-    <!-- TAB 2: TABLO (İSTATİSTİKLER BURAYA TAŞINDI) -->
+    <!-- TAB 2: TABLO -->
     <div id="tab-tablo" class="tab-content">
         
-        <!-- ÜST BİLGİ KARTLARI (Sadece bu sekmede) -->
+        <!-- ÜST BİLGİ KARTLARI -->
         <div class="dashboard-header">
             <div class="stat-card">
                 <div class="title" style="background-color: #a45aab;">TOPLAM ÇÖZÜLEN</div>
@@ -297,4 +297,228 @@
                         <th>Sosyal Bilgiler</th>
                         <th>Türkçe</th>
                         <th style="background-color: #4a1f5c;">Toplam</th>
-                        <th>Hedef
+                        <th>Hedef</th>
+                        <th>Ödev</th>
+                        <th>Durum</th>
+                        <th>Rozet</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- JavaScript ile doldurulacak -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ROZET MODALI (POP-UP) -->
+    <div id="rozet-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title" id="modal-title">Harika İşi!</div>
+            <div class="big-badge" id="modal-badge">💖</div>
+            <div class="modal-message" id="modal-message">Hedefe ulaştın!</div>
+            <button class="btn-close-modal" onclick="kapatModal()">Tamam, Teşekkürler! 💜</button>
+        </div>
+    </div>
+
+    <script>
+        // Olası bozuk kayıt (JSON) çökmelerini engellemek için try-catch eklendi
+        let cizelgeVerisi = {};
+        try {
+            cizelgeVerisi = JSON.parse(localStorage.getItem('ipekKuromiData')) || {};
+        } catch (e) {
+            cizelgeVerisi = {};
+        }
+        
+        const BASLANGIC_TARIHI = new Date('2026-10-05');
+        const GUN_SAYISI = 60; 
+
+        const TAVSIYELER = {
+            1: "📚 10 Soru Paragraf Rutini<br>📐 30 Soru Matematik + Okul Ödevi",
+            2: "📚 10 Soru Paragraf Rutini<br>📝 30 Soru Türkçe + Okul Ödevi",
+            3: "📚 10 Soru Paragraf Rutini<br>🔬 30 Soru Fen Bilimleri + Okul Ödevi",
+            4: "📚 10 Soru Paragraf Rutini<br>📐 30 Soru Matematik + Okul Ödevi",
+            5: "📚 10 Soru Paragraf Rutini<br>🌍 30 Soru Sosyal + Okul Ödevi",
+            6: "📚 10 Soru Paragraf Rutini<br>📝 30 Soru Türkçe + Okul Ödevi",
+            0: "🎉 HAFTALIK DİNLENME VE SERBEST ZAMAN GÜNÜ <br>(Çalışma Yok / Tatil)"
+        };
+
+        // Kapsam (Scope) hatası vermemesi için fonksiyonlar window objesine bağlandı
+        window.openTab = function(event, tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+            
+            if(tabId === 'tab-tablo') tabloyuOlustur();
+        };
+
+        function formatDate(date) {
+            let d = date.getDate().toString().padStart(2, '0');
+            let m = (date.getMonth() + 1).toString().padStart(2, '0');
+            let y = date.getFullYear();
+            return `${d}.${m}.${y}`;
+        }
+        
+        function formatInputDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        function getGunIsmi(date) {
+            const gunler = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+            return gunler[date.getDay()];
+        }
+
+        window.guncelleTavsiye = function() {
+            const secilenTarih = document.getElementById('input-tarih').value;
+            if(!secilenTarih) return;
+            
+            const islemTarihi = new Date(secilenTarih);
+            const gunIndex = islemTarihi.getDay(); 
+            
+            document.getElementById('tavsiye-metni').innerHTML = TAVSIYELER[gunIndex];
+        };
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('input-tarih').value = formatInputDate(new Date());
+            window.guncelleTavsiye();
+            tabloyuOlustur();
+        });
+
+        window.veriyiKaydet = function() {
+            const secilenTarih = document.getElementById('input-tarih').value; 
+            if(!secilenTarih) return alert("Lütfen bir tarih seç!");
+
+            const [y, m, d] = secilenTarih.split('-');
+            const formatliTarih = `${d}.${m}.${y}`;
+
+            const paragraf = parseInt(document.getElementById('inp-paragraf').value) || 0;
+            const matematik = parseInt(document.getElementById('inp-matematik').value) || 0;
+            const fen = parseInt(document.getElementById('inp-fen').value) || 0;
+            const sosyal = parseInt(document.getElementById('inp-sosyal').value) || 0;
+            const turkce = parseInt(document.getElementById('inp-turkce').value) || 0;
+            const odev = document.getElementById('inp-odev').value;
+
+            const gunlukToplam = paragraf + matematik + fen + sosyal + turkce;
+            const islemTarihi = new Date(secilenTarih);
+            const isPazar = islemTarihi.getDay() === 0;
+            const hedefSoru = isPazar ? 0 : 40;
+
+            cizelgeVerisi[formatliTarih] = {
+                paragraf, matematik, fen, sosyal, turkce,
+                odev: odev === 'Bekliyor' ? '' : odev
+            };
+            localStorage.setItem('ipekKuromiData', JSON.stringify(cizelgeVerisi));
+            tabloyuOlustur();
+
+            let rozet = "";
+            let baslik = "";
+            let mesaj = "";
+
+            if (isPazar) {
+                rozet = "👾"; 
+                baslik = "Bugün Tatil!"; 
+                mesaj = "Pazar günü dinlenme günü. İyi eğlenceler!";
+            } else if (gunlukToplam >= hedefSoru) {
+                rozet = "💖"; 
+                baslik = "Mükemmel İş!"; 
+                mesaj = `Harikasın! Toplam ${gunlukToplam} soru çözerek günlük hedefini geçtin.`;
+            } else if (odev === 'Ödevsiz Gün') {
+                rozet = "🎈"; 
+                baslik = "Ödevsiz Gün!"; 
+                mesaj = "Bugün ödev yokmuş, biraz dinlenebilirsin!";
+            } else if (gunlukToplam > 0 || odev === 'Yapıldı') {
+                rozet = "🖤"; 
+                baslik = "Çalışmaya Devam!"; 
+                mesaj = `Şu ana kadar hedefin için emek verdin. Daha iyisini de yapabilirsin!`;
+            } else {
+                rozet = "⏳";
+                baslik = "Güncellendi!";
+                mesaj = "Verilerin başarıyla tabloya eklendi.";
+            }
+
+            if (odev === 'Yapıldı' && !isPazar) {
+                mesaj += "<br><br>🌟 <strong>Ayrıca ödevlerini de tamamlamışsın, harikasın!</strong>";
+            }
+
+            document.getElementById('modal-badge').innerText = rozet;
+            document.getElementById('modal-title').innerText = baslik;
+            document.getElementById('modal-message').innerHTML = mesaj; 
+            document.getElementById('rozet-modal').style.display = 'block';
+        };
+
+        window.kapatModal = function() {
+            document.getElementById('rozet-modal').style.display = 'none';
+        };
+
+        function tabloyuOlustur() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            
+            let genelToplamSoru = 0;
+            let calisilanGunSayisi = 0;
+            let islenenTarih = new Date(BASLANGIC_TARIHI);
+
+            for (let i = 0; i < GUN_SAYISI; i++) {
+                const tarihStr = formatDate(islenenTarih);
+                const gunIsmi = getGunIsmi(islenenTarih);
+                const isPazar = islenenTarih.getDay() === 0;
+                const hedefSoru = isPazar ? 0 : 40;
+                
+                const gunVerisi = cizelgeVerisi[tarihStr] || { paragraf: '', matematik: '', fen: '', sosyal: '', turkce: '', odev: '' };
+                
+                let gunlukToplam = 0;
+                if(gunVerisi.paragraf) gunlukToplam += gunVerisi.paragraf;
+                if(gunVerisi.matematik) gunlukToplam += gunVerisi.matematik;
+                if(gunVerisi.fen) gunlukToplam += gunVerisi.fen;
+                if(gunVerisi.sosyal) gunlukToplam += gunVerisi.sosyal;
+                if(gunVerisi.turkce) gunlukToplam += gunVerisi.turkce;
+
+                let durum = "Bekliyor";
+                let rozet = "⏳ Bekliyor";
+                let odevDurumu = gunVerisi.odev || (isPazar ? "" : "-");
+                let bgColorClass = "";
+                let durumClass = "status-bekliyor";
+
+                if (isPazar) {
+                    durum = "Tatil"; rozet = "👾 Dinlenme"; bgColorClass = "row-tatil"; durumClass = "";
+                } else if (gunlukToplam > 0 || gunVerisi.odev) {
+                    if (gunlukToplam >= hedefSoru) {
+                        durum = "Hedefe Ulaşıldı"; rozet = "💖"; durumClass = "status-basarili";
+                    } else {
+                        durum = "Devam Ediyor"; rozet = "🖤 Çalışıyor";
+                    }
+                }
+
+                if(gunlukToplam > 0) {
+                    genelToplamSoru += gunlukToplam;
+                    calisilanGunSayisi++;
+                }
+
+                const tr = document.createElement('tr');
+                if(bgColorClass) tr.classList.add(bgColorClass);
+                
+                tr.innerHTML = `
+                    <td>${tarihStr}</td>
+                    <td>${gunIsmi}</td>
+                    <td style="color: #28a745; font-weight: bold;">${gunVerisi.paragraf || ''}</td>
+                    <td style="color: #28a745; font-weight: bold;">${gunVerisi.matematik || ''}</td>
+                    <td>${gunVerisi.fen || ''}</td>
+                    <td>${gunVerisi.sosyal || ''}</td>
+                    <td>${gunVerisi.turkce || ''}</td>
+                    <td style="font-weight: bold;">${gunlukToplam > 0 ? gunlukToplam : ''}</td>
+                    <td>${hedefSoru}</td>
+                    <td>${odevDurumu}</td>
+                    <td class="${durumClass}">${durum}</td>
+                    <td class="rozet">${rozet}</td>
+                `;
+                tbody.appendChild(tr);
+                islenenTarih.setDate(islenenTarih.getDate() + 1);
+            }
+
+            document.getElementById('toplam-cozulen-gosterge').innerText = genelToplamSoru;
+            const ortalama = calisilanGunSayisi > 0 ? Math.round(genelToplamSoru / calisilanGunSayisi) : 0;
+            document.getElementById('gunluk-ortalama-gosterge').innerText = ortalama;
+        }
+    </script>
+</body>
+</html>
