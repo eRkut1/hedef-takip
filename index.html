@@ -84,8 +84,12 @@
             margin-bottom: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             transition: background-color 0.5s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-        .main-header h1 { margin: 0; font-size: 1.5em; }
+        .main-header h1 { margin: 0; font-size: 1.5em; display: flex; align-items: center; gap: 10px; }
         .main-header p { margin: 5px 0 0 0; font-size: 1em; opacity: 0.9; }
 
         /* --- ÜST BİLGİ KARTLARI --- */
@@ -201,7 +205,6 @@
         .btn-save:hover { filter: brightness(1.1); transform: translateY(-2px); }
         .mascot-icon {
             text-align: center;
-            font-size: 4em;
             margin-bottom: 5px;
             animation: float 3s ease-in-out infinite;
         }
@@ -210,7 +213,7 @@
             50% { transform: translateY(-10px); }
         }
 
-        /* --- TABLO --- */
+        /* --- TABLO & GÖRSELLER --- */
         .table-container { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
@@ -219,6 +222,15 @@
         .row-tatil { background-color: rgba(0,0,0,0.03); color: #555; }
         .status-basarili { color: var(--success-text); font-weight: bold; }
         .status-bekliyor { color: #888; }
+        
+        .rozet-img {
+            height: 40px; 
+            width: 40px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            vertical-align: middle;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
         .rozet { font-size: 1.5em; }
 
         /* --- ROZET MODALI (POP-UP) --- */
@@ -249,7 +261,10 @@
         @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .modal-title { color: var(--header-dark); font-size: 1.5em; margin-bottom: 10px; font-weight: bold; }
         .modal-message { color: #555; font-size: 1.1em; margin-bottom: 20px; line-height: 1.4; }
+        
         .big-badge { font-size: 80px; margin: 20px 0; animation: bounce 2s infinite; }
+        .big-badge .rozet-img { height: 100px; width: 100px; }
+        
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
         .btn-close-modal {
             background-color: var(--header-dark);
@@ -379,7 +394,7 @@
         </div>
     </div>
 
-    <!-- FIREBASE COMPAT KÜTÜPHANELERİ (Daha stabil versiyon) -->
+    <!-- FIREBASE COMPAT KÜTÜPHANELERİ -->
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
 
@@ -394,23 +409,39 @@
             appId: "1:24084010787:web:2de9a5ba1552839911de96"
         };
 
-        // Firebase Başlatma
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         let cizelgeVerisi = {};
 
-        // --- TEMA AYARLARI VE İKONLARI ---
+        // --- TEMA AYARLARI VE WEB GÖRSELLERİ (GIF) ---
         const TEMA_VERILERI = {
             kuromi: {
-                baslik_ikon: "💜", baslik_ikon2: "✨", mascot: "🐰💜✨",
-                rozetler: { success: "💖", no_hw: "🎈", working: "🖤", rest: "👾", waiting: "⏳" }
+                baslik_ikon: `<img src="https://media1.tenor.com/m/o_0O4O0s-4MAAAAC/kuromi.gif" style="height:35px; border-radius:50%; vertical-align:middle;">`, 
+                baslik_ikon2: "✨", 
+                mascot: `<img src="https://media1.tenor.com/m/c_sRMB-l_rAAAAAd/kuromi-sanrio.gif" style="height:140px; border-radius:20px; box-shadow:0 6px 12px rgba(0,0,0,0.15);">`,
+                rozetler: { 
+                    success: `<img src="https://media1.tenor.com/m/P8Hq4c6tZ3QAAAAC/kuromi-sanrio.gif" class="rozet-img">`, 
+                    no_hw: "🎈", 
+                    working: `<img src="https://media1.tenor.com/m/O9aPZ917dQsAAAAd/kuromi.gif" class="rozet-img">`, 
+                    rest: "👾", 
+                    waiting: "⏳" 
+                }
             },
             ladybug: {
-                baslik_ikon: "🐞", baslik_ikon2: "🐾", mascot: "🐞🐾✨",
-                rozetler: { success: "🦸‍♀️", no_hw: "🥐", working: "🐾", rest: "🗼", waiting: "⏳" }
+                baslik_ikon: `<img src="https://media1.tenor.com/m/2tLhX-04r64AAAAC/miraculous-ladybug-miraculous.gif" style="height:35px; border-radius:50%; vertical-align:middle;">`, 
+                baslik_ikon2: "🐾", 
+                mascot: `<img src="https://media1.tenor.com/m/DIF5K2F7z4oAAAAC/miraculous-ladybug-ladybug.gif" style="height:140px; border-radius:20px; box-shadow:0 6px 12px rgba(0,0,0,0.15);">`,
+                rozetler: { 
+                    success: `<img src="https://media1.tenor.com/m/T3ZzNeq-n78AAAAC/lady-bug-miraculous.gif" class="rozet-img">`, 
+                    no_hw: "🥐", 
+                    working: `<img src="https://media1.tenor.com/m/71rJ_t9A5v4AAAAd/miraculous-ladybug.gif" class="rozet-img">`, 
+                    rest: "🗼", 
+                    waiting: "⏳" 
+                }
             },
             f4: {
-                baslik_ikon: "🦸‍♂️", baslik_ikon2: "🚀", mascot: "🦸‍♂️☄️🔥",
+                baslik_ikon: "🦸‍♂️", baslik_ikon2: "🚀", 
+                mascot: `<div style="font-size: 80px;">🦸‍♂️☄️🔥</div>`,
                 rozetler: { success: "🚀", no_hw: "🌌", working: "⚛️", rest: "🏙️", waiting: "⏳" }
             }
         };
@@ -433,9 +464,9 @@
             document.getElementById('theme-select').value = aktifTema;
             
             const data = TEMA_VERILERI[aktifTema];
-            document.getElementById('header-icon').innerText = data.baslik_ikon;
-            document.getElementById('header-icon2').innerText = data.baslik_ikon2;
-            document.getElementById('main-mascot').innerText = data.mascot;
+            document.getElementById('header-icon').innerHTML = data.baslik_ikon;
+            document.getElementById('header-icon2').innerHTML = data.baslik_ikon2;
+            document.getElementById('main-mascot').innerHTML = data.mascot;
         }
 
         const BASLANGIC_TARIHI = new Date('2026-10-05');
@@ -451,7 +482,6 @@
             0: "🎉 HAFTALIK DİNLENME VE SERBEST ZAMAN GÜNÜ <br>(Çalışma Yok / Tatil)"
         };
 
-        // Veritabanını Dinle
         db.ref('ipekData').on('value', (snapshot) => {
             cizelgeVerisi = snapshot.val() || {};
             tabloyuOlustur();
@@ -489,7 +519,6 @@
             document.getElementById('tavsiye-metni').innerHTML = TAVSIYELER[islemTarihi.getDay()];
         }
 
-        // Sayfa yüklendiğinde çalışacaklar
         window.onload = function() {
             temaUygula(); 
             document.getElementById('input-tarih').value = formatInputDate(new Date());
@@ -517,10 +546,8 @@
                 odev: odev === 'Bekliyor' ? '' : odev
             };
 
-            // Firebase'e Gönderim
             db.ref('ipekData/' + secilenTarih).set(kaydedilecekVeri);
 
-            // Pop-up Mesaj Mantığı (Temaya Göre İkonlar)
             const R = TEMA_VERILERI[aktifTema].rozetler;
             let rozet = "", baslik = "", mesaj = "";
 
@@ -566,7 +593,7 @@
                 }
             }
 
-            document.getElementById('modal-badge').innerText = rozet;
+            document.getElementById('modal-badge').innerHTML = rozet;
             document.getElementById('modal-title').innerText = baslik;
             document.getElementById('modal-message').innerHTML = mesaj; 
             document.getElementById('rozet-modal').style.display = 'block';
@@ -603,18 +630,18 @@
                 if(gunVerisi.turkce) gunlukToplam += gunVerisi.turkce;
 
                 let durum = "Bekliyor";
-                let rozet = R.waiting + " Bekliyor";
+                let rozet = R.waiting;
                 let odevDurumu = gunVerisi.odev || (isPazar ? "" : "-");
                 let bgColorClass = "";
                 let durumClass = "status-bekliyor";
 
                 if (isPazar) {
-                    durum = "Tatil"; rozet = R.rest + " Dinlenme"; bgColorClass = "row-tatil"; durumClass = "";
+                    durum = "Tatil"; rozet = R.rest; bgColorClass = "row-tatil"; durumClass = "";
                 } else if (gunlukToplam > 0 || gunVerisi.odev) {
                     if (gunlukToplam >= hedefSoru) {
                         durum = "Hedefe Ulaşıldı"; rozet = R.success; durumClass = "status-basarili";
                     } else {
-                        durum = "Devam Ediyor"; rozet = R.working + " Çalışıyor";
+                        durum = "Devam Ediyor"; rozet = R.working;
                     }
                 }
 
@@ -638,7 +665,7 @@
                     <td>${hedefSoru}</td>
                     <td>${odevDurumu}</td>
                     <td class="${durumClass}">${durum}</td>
-                    <td class="rozet">${rozet}</td>
+                    <td class="rozet" style="text-align: center;">${rozet}</td>
                 `;
                 tbody.appendChild(tr);
                 islenenTarih.setDate(islenenTarih.getDate() + 1);
